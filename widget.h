@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPoint>
+#include <QFont>
 using namespace std;
 namespace Ui {
 class Widget;
@@ -42,7 +43,7 @@ class Widget : public QWidget
     Q_OBJECT
 
 public:
-    explicit Widget(QWidget *parent = 0);
+    explicit Widget(QWidget *parent = nullptr);
     ~Widget();
     //void mousePressEvent(QMouseEvent *event);
 
@@ -59,7 +60,7 @@ private slots:
 private:
     bool isInBoard(int x, int y)const;
     void showGreeter();
-    void showMines(int x, int y);
+    void showMines(unsigned x, unsigned y);
     void initializeItems();
     void drawMine(int x, int y);
     void drawDiscovered(int x, int y,int num);
@@ -73,7 +74,7 @@ private:
     //QGridLayout *mineGrid;
     vector<QPushButton*> greetButtons;
     vector<vector<myButton*>> mines;
-    int minesX,minesY;
+    unsigned minesX,minesY;
     mineSweeper *m;
 };
 

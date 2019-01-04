@@ -1,7 +1,7 @@
 #include "widget.h"
 #include "ui_widget.h"
 
-QFont fon;
+static QFont fon;
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget),
@@ -40,7 +40,7 @@ void Widget::showGreeter(){
         }
     }
 
-    for(int i=4; i<7; ++i){
+    for(unsigned i=4; i<7; ++i){
         greetButtons[i]->setGeometry(0,0,0,0);
     }
 
@@ -52,9 +52,9 @@ void Widget::showGreeter(){
     minesX = minesY = 0;
 }
 
-void Widget::showMines(int x, int y){
-    minesX = x, minesY = y;
-    for(int i=0; i < 4; ++i){
+void Widget::showMines(unsigned x, unsigned y){
+    minesX = x; minesY = y;
+    for(unsigned i=0; i < 4; ++i){
         greetButtons[i]->setGeometry(1,1,0,0);
     }
 
@@ -66,15 +66,15 @@ void Widget::showMines(int x, int y){
         }
     }
 
-    int w(480/x),h(480/y);
-    for(int i = 0; i < x; ++i){
-        for(int j = 0; j < y; ++j){;
-            mines[i][j]->setGeometry(20+i*h,20+j*h,w-3,h-3);
+    unsigned w(480/x),h(480/y);
+    for(unsigned i = 0; i < x; ++i){
+        for(unsigned j = 0; j < y; ++j){;
+            mines[i][j]->setGeometry(int(20+i*h),int(20+j*h),int(w-3),int(h-3));
 
             mines[i][j]->setStyleSheet("QPushButton{border-image:url(:/Ico/back)}"
                                        "QPushButton:hover{border-image:url(:/Ico/back_1)}"
                                        "QPushButton:pressed{background-color:rgb(255, 255, 255); border-style: inset;}");
-            mines[i][j]->setIconSize(QSize(w,h));
+            mines[i][j]->setIconSize(QSize(int(w),int(h)));
 
             mines[i][j]->setText("");
             //mines[i][j]->setEnabled();
@@ -93,37 +93,37 @@ void Widget::showMines(int x, int y){
 }
 
 void Widget::drawMine(int x, int y){
-    mines[x][y]->setStyleSheet("QPushButton{border-image:url(:/Ico/mine)}");
+    mines[unsigned(x)][unsigned(y)]->setStyleSheet("QPushButton{border-image:url(:/Ico/mine)}");
 }
 
 void Widget::drawDiscovered(int x, int y,int num){
-    fon.setPixelSize(480/minesX*0.8);
-    mines[x][y]->setStyleSheet("QPushButton{border-image:url(:/Ico/back_3)}");
-    mines[x][y]->setFont(fon);
+    fon.setPixelSize(int(480/minesX*0.8));
+    mines[unsigned(x)][unsigned(y)]->setStyleSheet("QPushButton{border-image:url(:/Ico/back_3)}");
+    mines[unsigned(x)][unsigned(y)]->setFont(fon);
     QString n;
     if(num > 0){
         n = QString::number(num);
     }
-    mines[x][y]->setText(n);
+    mines[unsigned(x)][unsigned(y)]->setText(n);
 }
 
 void Widget::drawFlag(int x, int y, bool s){
     if(s)
-        mines[x][y]->setStyleSheet("QPushButton{border-image:url(:/Ico/back); image:url(:/Ico/flag);}");
+        mines[unsigned(x)][unsigned(y)]->setStyleSheet("QPushButton{border-image:url(:/Ico/back); image:url(:/Ico/flag);}");
     else {
-        mines[x][y]->setStyleSheet("QPushButton{border-image:url(:/Ico/back); image:url(:/Ico/back);}");
+        mines[unsigned(x)][unsigned(y)]->setStyleSheet("QPushButton{border-image:url(:/Ico/back); image:url(:/Ico/back);}");
     }
 }
 
 void Widget::refresh(){
     vector<vector<int>> landMap = m->getMap();
-    for(int i=0; i < minesX; ++i){
-        for(int j=0; j < minesX; ++j){
+    for(unsigned i=0; i < minesX; ++i){
+        for(unsigned j=0; j < minesX; ++j){
             if(landMap[i][j] >= 0){
-                drawDiscovered(i,j,landMap[i][j]);
+                drawDiscovered(int(i),int(j),landMap[i][j]);
             }
             if(landMap[i][j] == -1){
-                drawMine(i,j);
+                drawMine(int(i),int(j));
             }
         }
     }
@@ -159,7 +159,7 @@ void Widget::initializeItems(){
     greetButtons[4]->setFont(fon);
     greetButtons[5]->setText(QString("Back"));
     greetButtons[5]->setFont(fon);
-    greetButtons[6]->setText(QString("AI"));
+    greetButtons[6]->setText(QString("Hint"));
     greetButtons[6]->setFont(fon);
 
     QObject::connect(greetButtons[4], &QPushButton::clicked, this, &Widget::again);
@@ -238,7 +238,9 @@ void Widget::mineClicked(){
     if(m->click(boardX,boardY)){
         refresh();
     }
-    this->setWindowTitle(QString::number(boardX)+"," + QString::number(boardY));
+
+    //this operation is to convinience the debug
+    //this->setWindowTitle(QString::number(boardX)+"," + QString::number(boardY));
 
     if(!m->clickAble()){
         if(m->getResult()>0){
@@ -279,7 +281,7 @@ void Widget::mineRightClicked(){
 }
 
 bool Widget::isInBoard(int x, int y)const{
-        return x>=0 && x<minesX && y>=0 && y<minesY;
+        return x>=0 && unsigned(x)<minesX && y>=0 && unsigned(y)<minesY;
 }
 
 void Widget::autoPlay(){
@@ -298,11 +300,11 @@ void Widget::autoPlay(){
 
     queue<int> qx;
     queue<int> qy;
-    for(int i = 0; i < minesX; ++i){
-        for(int j = 0; j < minesX; ++j){
+    for(unsigned i = 0; i < minesX; ++i){
+        for(unsigned j = 0; j < minesX; ++j){
             if(board[i][j] > 0){
-                qx.push(i);
-                qy.push(j);
+                qx.push(int(i));
+                qy.push(int(j));
             }
         }
     }
@@ -312,7 +314,7 @@ void Widget::autoPlay(){
 
         int i = qx.front();
         int j = qy.front();
-        int n = board[i][j];
+        int n = board[unsigned(i)][unsigned(j)];
         int tx, ty;
 
         int ok[8] = {0};
@@ -322,7 +324,7 @@ void Widget::autoPlay(){
             tx = i + direction[k][0];
             ty = j + direction[k][1];
             if(isInBoard(tx,ty)){
-                if(board[tx][ty] == -10){
+                if(board[unsigned(tx)][unsigned(ty)] == -10){
                     ok[k] = -10;
                     ++un;
                 }
@@ -359,7 +361,7 @@ void Widget::autoPlay(){
                         isPlayed = true;
                         m->click(tx,ty);
                         board = m->getMap();
-                        drawDiscovered(tx,ty,board[tx][ty]);
+                        drawDiscovered(tx,ty,board[unsigned(tx)][unsigned(ty)]);
                     }
                 }
             }
@@ -375,7 +377,7 @@ void Widget::autoPlay(){
         int x=0,y=0;
         if(m->getArecommand(x,y)){
             drawFlag(x,y,false);
-            QMessageBox::information(this,"Message","No more good choice, I have helped you click one more step!",QMessageBox::Button());
+            //QMessageBox::information(this,"Message","No more good choice, I have helped you click one more step!",QMessageBox::Button());
             refresh();
         }
     }

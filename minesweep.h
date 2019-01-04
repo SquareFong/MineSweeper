@@ -11,9 +11,9 @@ private:
     vector<vector<int>> mines;
     vector<vector<bool>> flags;
     vector<vector<bool>> discovered;
+    int sizeOfMap;
     //-1 lose, 0 not end, 1 win
     int isEnd;
-    int sizeOfMap;
     int numberOfMines;
     int direction[8][2]={{1,0},
                          {1,1},
@@ -28,7 +28,7 @@ private:
             return x>=0 && x<sizeOfMap && y>=0 && y<sizeOfMap;
     }
 public:
-    mineSweeper(unsigned lines):sizeOfMap(lines),isEnd(false){
+    mineSweeper(unsigned lines):sizeOfMap(int(lines)),isEnd(false){
         //initialize map
         for(unsigned i=0; i<lines; ++i)
         {
@@ -42,7 +42,7 @@ public:
         case 16:numberOfMines = 40;break;
         case 24:numberOfMines = 99;break;
         default:
-            numberOfMines = lines;
+            numberOfMines = sizeOfMap;
             break;
         }
         //initialize landemines
@@ -50,32 +50,32 @@ public:
         int tx,ty;
         for(int i = 0; i < numberOfMines; ++i){
             c = clock();
-            srand(c);
+            srand(unsigned(c));
             long long int r = rand();
             tx = r%sizeOfMap;
             r/=100;
             ty = r%sizeOfMap;
-            if(mines[tx][ty] == -1)
+            if(mines[unsigned(tx)][unsigned(ty)] == -1)
                 --i;
             else
-                mines[tx][ty] = -1;
+                mines[unsigned(tx)][unsigned(ty)] = -1;
         }
 
         //continue to intialize map
-        for(unsigned i=0; i<lines; ++i){
-            for(unsigned j=0; j<lines; ++j){
-                if(mines[i][j] == 0){
+        for(int i=0; i<sizeOfMap; ++i){
+            for(int j=0; j<sizeOfMap; ++j){
+                if(mines[unsigned(i)][unsigned(j)] == 0){
                     int counter = 0;
                     int x,y;
                     for(int k=0; k<8; ++k){
                         x=i+direction[k][0];
                         y=j+direction[k][1];
                         if(isInBoard(x,y)){
-                            if(mines[x][y] == -1)
+                            if(mines[unsigned(x)][unsigned(y)] == -1)
                                 ++counter;
                         }
                     }
-                    mines[i][j] = counter;
+                    mines[unsigned(i)][unsigned(j)] = counter;
                 }
             }
         }
@@ -85,8 +85,8 @@ public:
         vector<vector<int>> temp = mines;
         for(int i=0; i < sizeOfMap; ++i){
             for(int j=0; j < sizeOfMap; ++j){
-                if(!discovered[i][j])
-                    temp[i][j] = -10;
+                if(!discovered[unsigned(i)][unsigned(j)])
+                    temp[unsigned(i)][unsigned(j)] = -10;
             }
         }
         return temp;
@@ -101,20 +101,20 @@ public:
     }
 
     bool click(int x,int y){
-        if((!isInBoard(x,y)) || discovered[x][y] || flags[x][y])
+        if((!isInBoard(x,y)) || discovered[unsigned(x)][unsigned(y)] || flags[unsigned(x)][unsigned(y)])
             return false;
-        discovered[x][y] = true;
-        if(mines[x][y] == -1){
+        discovered[unsigned(x)][unsigned(y)] = true;
+        if(mines[unsigned(x)][unsigned(y)] == -1){
             isEnd = -1;
             for(int i=0; i < sizeOfMap; ++i){
                 for(int j=0; j < sizeOfMap; ++j){
-                    if(mines[i][j] == -1)
-                        discovered[i][j] = true;
+                    if(mines[unsigned(i)][unsigned(j)] == -1)
+                        discovered[unsigned(i)][unsigned(j)] = true;
                 }
             }
         }
 
-        if(mines[x][y] == 0){
+        if(mines[unsigned(x)][unsigned(y)] == 0){
             queue<int> sx;
             queue<int> sy;
             sx.push(x);
@@ -126,12 +126,12 @@ public:
                 for(int k(0); k<8; ++k){
                     int dx = tempX + direction[k][0];
                     int dy = tempY + direction[k][1];
-                    if(isInBoard(dx,dy) && mines[dx][dy] >= 0){
-                        if((mines[dx][dy] == 0) && !discovered[dx][dy]){
+                    if(isInBoard(dx,dy) && mines[unsigned(dx)][unsigned(dy)] >= 0){
+                        if((mines[unsigned(dx)][unsigned(dy)] == 0) && !discovered[unsigned(dx)][unsigned(dy)]){
                             sx.push(dx);
                             sy.push(dy);
                         }
-                        discovered[dx][dy] = true;
+                        discovered[unsigned(dx)][unsigned(dy)] = true;
                     }
                 }
                 sx.pop();
@@ -143,9 +143,9 @@ public:
         int count = 0, count_1 = 0;
         for(i = 0; i<sizeOfMap; ++i){
             for(j=0; j<sizeOfMap; ++j){
-                if((discovered[i][j] == false) ){
+                if((discovered[unsigned(i)][unsigned(j)] == false) ){
                     ++count_1;
-                    if(mines[i][j] == -1)
+                    if(mines[unsigned(i)][unsigned(j)] == -1)
                         ++count;
                 }
             }
@@ -157,18 +157,18 @@ public:
     }
 
     bool isFlag(int x,int y){
-        return flags[x][y];
+        return flags[unsigned(x)][unsigned(y)];
     }
 
     bool putFlags(int x, int y){
-        if(isInBoard(x,y) && !discovered[x][y]){
-            flags[x][y] = true;
+        if(isInBoard(x,y) && !discovered[unsigned(x)][unsigned(y)]){
+            flags[unsigned(x)][unsigned(y)] = true;
 
             int nf=0;
-            int i,j;
+            int i=0,j=0;
             for(i = 0; i < sizeOfMap; ++i){
                 for(j = 0; j< sizeOfMap; ++j){
-                    if((flags[i][j]) == (mines[i][j] == -1)){
+                    if((flags[unsigned(i)][unsigned(j)]) == (mines[unsigned(i)][unsigned(j)] == -1)){
                         ++nf;
                         continue;
                     }
@@ -187,8 +187,8 @@ public:
     }
 
     bool unputFlags(int x,int y){
-        if(flags[x][y]){
-            flags[x][y] = false;
+        if(flags[unsigned(x)][unsigned(y)]){
+            flags[unsigned(x)][unsigned(y)] = false;
             return true;
         }
         return false;
@@ -197,9 +197,9 @@ public:
     bool getArecommand(int &x, int &y){
         for(int i(0); i < sizeOfMap; ++i){
             for(int j(0); j<sizeOfMap; ++j){
-                if(mines[i][j] >=0 && !discovered[i][j]){
-                    if(flags[i][j])
-                        flags[i][j] = false;
+                if(mines[unsigned(i)][unsigned(j)] >=0 && !discovered[unsigned(i)][unsigned(j)]){
+                    if(flags[unsigned(i)][unsigned(j)])
+                        flags[unsigned(i)][unsigned(j)] = false;
                     x = i;
                     y = j;
                     click(x,y);
