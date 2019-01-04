@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/Ico">
+        <file alias="back">back.png</file>
+        <file alias="back_1">back_1.png</file>
+        <file alias="mine">mine.ico</file>
+        <file alias="flag">flag_128px.ico</file>
+        <file alias="back_3">back_3.png</file>
+    </qresource>
+</RCC>
